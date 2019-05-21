@@ -7,6 +7,7 @@ import sklearn.decomposition
 import sklearn.preprocessing
 import sklearn.neural_network
 import sklearn.linear_model
+import sklearn.kernel_ridge
 import sklearn.discriminant_analysis
 import sklearn.feature_extraction.text
 import sklearn.naive_bayes
@@ -100,6 +101,10 @@ def sklearn_SGDClassifier(*args, **kwargs):
 @scope.define
 def sklearn_SGDRegressor(*args, **kwargs):
     return sklearn.linear_model.SGDRegressor(*args, **kwargs)
+
+@scope.define
+def sklearn_KernelRidge(*args, **kwargs):
+    return sklearn.kernel_ridge.KernelRidge(*args, **kwargs)
 
 @scope.define
 def sklearn_XGBClassifier(*args, **kwargs):
@@ -604,6 +609,95 @@ def svr(name, kernels=['linear', 'rbf', 'poly', 'sigmoid'], **kwargs):
         'sigmoid': partial(svr_sigmoid, name=name),
     }
     choices = [svms[kern](**kwargs) for kern in kernels]
+    if len(choices) == 1:
+        rval = choices[0]
+    else:
+        rval = hp.choice('%s.kernel' % name, choices)
+    return rval
+
+
+##################################################
+##==== KRRclassifier constructor ====##
+##################################################
+def _krr_hp_space(
+        name_func,
+        kernel,
+        alpha=None,
+        n_features=1,
+        C=None,
+        gamma=None,
+        coef0=None,
+        degree=None,
+        verbose=False):
+    '''Generate SVM hyperparamters search space
+    '''
+    if kernel in ['linear', 'rbf', 'sigmoid']:
+        degree_ = 1
+    else:
+        degree_ = (_svm_degree(name_func('degree'))
+                   if degree is None else degree)
+    if kernel in ['linear']:
+        gamma_ = 'auto'
+    else:
+        gamma_ = (_svm_gamma(name_func('gamma'), n_features=1)
+                  if gamma is None else gamma)
+        gamma_ /= n_features  # make gamma independent of n_features.
+    if kernel in ['linear', 'rbf']:
+        coef0_ = 0.0
+    elif coef0 is None:
+        if kernel == 'poly':
+            coef0_ = hp.pchoice(name_func('coef0'), [
+                (0.3, 0),
+                (0.7, gamma_ * hp.uniform(name_func('coef0val'), 0., 10.))
+            ])
+        elif kernel == 'sigmoid':
+            coef0_ = hp.pchoice(name_func('coef0'), [
+                (0.3, 0),
+                (0.7, gamma_ * hp.uniform(name_func('coef0val'), -10., 10.))
+            ])
+        else:
+            pass
+    else:
+        coef0_ = coef0
+
+    if alpha is None:
+        alpha_ = hp.loguniform(name, np.log(1e-3), np.log(1e3))
+    else:
+        alpha_ = alpha
+
+    hp_space = dict(
+        kernel=kernel,
+        C=_svm_C(name_func('C')) if C is None else C,
+        gamma=gamma_,
+        coef0=coef0_,
+        degree=degree_,
+        alpha=alpha_,
+        verbose=verbose)
+    return hp_space
+
+def krr_kernel(name, kernel, alpha=None, **kwargs):
+    """
+    Return a pyll graph with hyperparamters that will construct
+    a sklearn.kernel_ridge model with a user specified kernel.
+
+    Args:
+        alpha([float]): penalty
+    """
+    def _name(msg):
+        return '%s.%s_%s' % (name, kernel, msg)
+
+    hp_space = _krr_hp_space(_name, kernel=kernel, **kwargs)
+    return scope.sklearn_KernelRidge(**hp_space)
+
+
+def kernel_ridge(name, kernels=['linear', 'rbf', 'poly', 'sigmoid'], **kwargs):
+    krrs = {
+        'linear': partial(svr_linear, name=name),
+        'rbf': partial(svr_rbf, name=name),
+        'poly': partial(svr_poly, name=name),
+        'sigmoid': partial(svr_sigmoid, name=name),
+    }
+    choices = [krrs[kern](**kwargs) for kern in kernels]
     if len(choices) == 1:
         rval = choices[0]
     else:

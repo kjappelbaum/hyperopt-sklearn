@@ -4,7 +4,7 @@ except:
     import unittest
 
 import numpy as np
-from hyperopt import rand, tpe
+from hyperopt import rand
 from hpsklearn.estimator import hyperopt_estimator
 from hpsklearn import components
 
@@ -49,6 +49,7 @@ regressors = [
     components.sgd_regression,
     components.lasso,
     components.elasticnet,
+    components.kernel_ridge,
 ]
 
 
