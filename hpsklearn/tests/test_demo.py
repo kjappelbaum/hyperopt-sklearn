@@ -1,7 +1,7 @@
 from __future__ import print_function
 # import numpy as np
 from sklearn import datasets
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from hyperopt import tpe
 import hpsklearn
 import sys

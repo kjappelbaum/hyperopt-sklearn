@@ -7,6 +7,7 @@ import sklearn.decomposition
 import sklearn.preprocessing
 import sklearn.neural_network
 import sklearn.linear_model
+import sklearn.gaussian_process
 import sklearn.kernel_ridge
 import sklearn.discriminant_analysis
 import sklearn.feature_extraction.text
@@ -103,6 +104,10 @@ def sklearn_SGDRegressor(*args, **kwargs):
     return sklearn.linear_model.SGDRegressor(*args, **kwargs)
 
 @scope.define
+def sklearn_RANSAC(*args, **kwargs):
+    return sklearn.linear_model.RANSACRegressor(*args, **kwargs)
+
+@scope.define
 def sklearn_KernelRidge(*args, **kwargs):
     return sklearn.kernel_ridge.KernelRidge(*args, **kwargs)
 
@@ -117,6 +122,10 @@ def sklearn_XGBRegressor(*args, **kwargs):
     if xgboost is None:
         raise ImportError('No module named xgboost')
     return xgboost.XGBRegressor(*args, **kwargs)
+
+@scope.define
+def sklearn_GPRegressor(*args, **kwargs):
+    return sklearn.gaussian_process.GaussianProcessRegressor(*args, **kwargs)
 
 # @scope.define
 # def sklearn_Ridge(*args, **kwargs):
@@ -616,8 +625,41 @@ def svr(name, kernels=['linear', 'rbf', 'poly', 'sigmoid'], **kwargs):
     return rval
 
 
+def _gp_hp_space(_name):
+    """
+    ToDo: more intelligent option to optimize Kernel parameters, probably should use itertools
+    :return:
+    """
+    from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel, RBF, RationalQuadratic
+
+    kernel_choices = [RBF(),
+                      ConstantKernel() + Matern(length_scale=2, nu=3 / 2) + WhiteKernel(noise_level=1),
+                      ConstantKernel() + Matern(length_scale=2, nu=3 / 2) + WhiteKernel(noise_level=1) + RBF(),
+                      ConstantKernel() + WhiteKernel(noise_level=1) + RBF(),
+                      Matern(length_scale=2, nu=3 / 2) + WhiteKernel(noise_level=1),
+                      RBF() + WhiteKernel(noise_level=1),
+                      ConstantKernel() + WhiteKernel(noise_level=1) + RationalQuadratic(),
+                      ]
+
+    hp_space = dict(
+        kernel=hp.choice(_name('kernel'), kernel_choices),
+        alpha=hp.loguniform(_name('alpha'), -15, 0)
+    )
+    return hp_space
+
+def gp_regression(name, **kwargs):
+    '''
+
+    '''
+    def _name(msg):
+        return '%s.%s_%s' % (name, 'gpr', msg)
+
+    hp_space = _gp_hp_space(_name, **kwargs)
+    return scope.sklearn_GPRegressor(**hp_space)
+
+
 ##################################################
-##==== KRRclassifier constructor ====##
+##==== KRR constructor ====##
 ##################################################
 def _krr_hp_space(
         name_func,
@@ -661,7 +703,7 @@ def _krr_hp_space(
         coef0_ = coef0
 
     if alpha is None:
-        alpha_ = hp.loguniform(name, np.log(1e-3), np.log(1e3))
+        alpha_ = hp.loguniform(name_func('alpha'), np.log(1e-3), np.log(1e3))
     else:
         alpha_ = alpha
 

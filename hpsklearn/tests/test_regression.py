@@ -4,7 +4,7 @@ except:
     import unittest
 
 import numpy as np
-from hyperopt import rand
+from hyperopt import rand, tpe
 from hpsklearn.estimator import hyperopt_estimator
 from hpsklearn import components
 
@@ -25,7 +25,7 @@ def create_function(reg_fn):
             preprocessing=[],
             algo=rand.suggest,
             trial_timeout=5.0,
-            max_evals=5,
+            max_evals=100,
         )
         model.fit(self.X_train, self.Y_train)
         model.score(self.X_test, self.Y_test)
@@ -50,6 +50,7 @@ regressors = [
     components.lasso,
     components.elasticnet,
     components.kernel_ridge,
+    components.gp_regression,
 ]
 
 
