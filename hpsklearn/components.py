@@ -310,7 +310,7 @@ def _knn_p(name):
     return hp.quniform(name, 2.5, 5.5, 1)
 
 def _knn_neighbors(name):
-    return scope.int(hp.qloguniform(name, np.log(0.5), np.log(50.5), 1))
+    return scope.int(hp.qloguniform(name, np.log(0.5), np.log(30.5), 1))
 
 def _knn_weights(name):
     return hp.choice(name, ['uniform', 'distance'])
