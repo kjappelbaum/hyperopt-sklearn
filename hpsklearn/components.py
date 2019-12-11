@@ -661,6 +661,14 @@ def gp_regression(name, **kwargs):
 ##################################################
 ##==== KRR constructor ====##
 ##################################################
+
+def krr_rbf(name, **kwargs):
+    '''Simply use the svr_kernel function with kernel fixed as linear to
+    return an SVR object.
+    '''
+    return krr_kernel(name, kernel='rbf', **kwargs)
+
+
 def _krr_hp_space(
         name_func,
         kernel,
