@@ -40,6 +40,7 @@ regressors = [
     components.svr_linear,
     components.svr_rbf,
     components.svr_poly,
+    components.krr_rbf,
     components.svr_sigmoid,
     components.knn_regression,
     components.ada_boost_regression,
