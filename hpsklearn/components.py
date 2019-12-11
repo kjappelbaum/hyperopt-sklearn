@@ -659,7 +659,7 @@ def gp_regression(name, **kwargs):
 
 
 ##################################################
-##==== KRR constructor ====##
+##====  constructor ====##
 ##################################################
 
 def krr_rbf(name, **kwargs):
@@ -674,12 +674,11 @@ def _krr_hp_space(
         kernel,
         alpha=None,
         n_features=1,
-        C=None,
         gamma=None,
         coef0=None,
         degree=None,
         verbose=False):
-    '''Generate SVM hyperparamters search space
+    '''Generate KRR hyperparamters search space
     '''
     if kernel in ['linear', 'rbf', 'sigmoid']:
         degree_ = 1
@@ -717,7 +716,6 @@ def _krr_hp_space(
 
     hp_space = dict(
         kernel=kernel,
-        C=_svm_C(name_func('C')) if C is None else C,
         gamma=gamma_,
         coef0=coef0_,
         degree=degree_,
