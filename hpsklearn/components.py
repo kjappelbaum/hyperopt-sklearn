@@ -719,8 +719,7 @@ def _krr_hp_space(
         gamma=gamma_,
         coef0=coef0_,
         degree=degree_,
-        alpha=alpha_,
-        verbose=verbose)
+        alpha=alpha_)
     return hp_space
 
 def krr_kernel(name, kernel, alpha=None, **kwargs):
