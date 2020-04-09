@@ -71,8 +71,21 @@ except ImportError:
 if xgboost is not None:
     setattr(
         TestRegression,
-        'test_{0}'.format(clf.__name__),
+        'test_xgboost_regression',
         create_function(components.xgboost_regression)
+    )
+
+# Only test the lightgbm regressor if the optional dependency is installed
+try:
+    import lightgbm
+except ImportError:
+    lightgbm = None
+
+if lightgbm is not None:
+    setattr(
+        TestRegression,
+        'test_lightgmb_regression',
+        create_function(components.lightgbm_regression)
     )
 
 if __name__ == '__main__':
