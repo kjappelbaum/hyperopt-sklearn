@@ -308,6 +308,7 @@ def _cost_fn(
             if not shuffle:  # always choose the last samples.
                 info("Will use the last", valid_size, " samples for validation")
                 n_train = int(len(y) - valid_size)
+                print(n_train)
                 valid_fold = np.ones(len(y), dtype=np.int)
                 valid_fold[:n_train] = -1  # "-1" indicates train fold.
                 try:

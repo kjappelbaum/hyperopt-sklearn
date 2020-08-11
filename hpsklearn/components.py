@@ -74,7 +74,7 @@ def sklearn_AdaBoostRegressor(*args, **kwargs):
 
 @scope.define
 def sklearn_GradientBoostingClassifier(*args, **kwargs):
-    return sklearn.ensemble.GradientBoostingClassifier(*args, **kwargs)
+    return sklearn.ensemble.HistGradientBoostingClassifier(*args, **kwargs)
 
 
 @scope.define
