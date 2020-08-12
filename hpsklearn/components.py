@@ -74,7 +74,7 @@ def sklearn_AdaBoostRegressor(*args, **kwargs):
 
 @scope.define
 def sklearn_GradientBoostingClassifier(*args, **kwargs):
-    return sklearn.ensemble.HistGradientBoostingClassifier(*args, **kwargs)
+    return sklearn.ensemble.GradientBoostingClassifier(*args, **kwargs)
 
 
 @scope.define
@@ -1247,7 +1247,7 @@ def _grad_boosting_hp_space(
             if learning_rate is None
             else learning_rate
         ),
-        n_estimators=(
+        max_iter=(
             _boosting_n_estimators(name_func("n_estimators"))
             if n_estimators is None
             else n_estimators
